@@ -46,34 +46,95 @@ const films = [
 const list = document.querySelector("#list");
 
 function createItem(film) {
-    const li = document.createElement("li");
-    li.dataset.id = film.id;
-    li.className = "flex items-center gap-2 rounded bg-white p-3 shadow";
-    li.classList.toggle("opacity-60", film.watched);
+  const li = document.createElement("li");
+  li.dataset.id = film.id;
+  li.className = "flex items-center gap-2 rounded bg-white p-3 shadow";
+  li.classList.toggle("opacity-60", film.watched);
 
-    const text =  document.createElement("span");
-    text.className = "flex-1";
-    text.classList.toggle("line-through", film.watched);
-    text.textContent = `${film.title} - ${film.genre} - ${film.minutes} min`;
+  const text = document.createElement("span");
+  text.className = "flex-1";
+  text.classList.toggle("line-through", film.watched);
+  text.textContent = `${film.title} - ${film.genre} - ${film.minutes} min`;
 
-    const toggle = document.createElement("button");
-    toggle.type = "button";
-    toggle.dataset.action = "toggle";
-    toggle.className = "rounded bg-emerald-100 px-2 py-1 text-sm hover:bg-emerald-200";
-    toggle.textContent = film.watched ? "Vrati" : "Pogledan";
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.dataset.action = "toggle";
+  toggle.className =
+    "rounded bg-emerald-100 px-2 py-1 text-sm hover:bg-emerald-200";
+  toggle.textContent = film.watched ? "Vrati" : "Pogledan";
 
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.dataset.action = "delete";
-    remove.className = "rounded bg-red-100 px-2 py-1 text-sm hover:bg-red-200";
-    remove.textContent = "Obriši";
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.dataset.action = "delete";
+  remove.className = "rounded bg-red-100 px-2 py-1 text-sm hover:bg-red-200";
+  remove.textContent = "Obriši";
 
-    li.append(text, toggle, remove);
-    return li;
+  li.append(text, toggle, remove);
+  return li;
 }
 
-function render(){
-    list.replaceChildren(...films.map(createItem));
+function render() {
+  list.replaceChildren(...films.map(createItem));
 }
+
+list.addEventListener("click", (event) => {
+  console.log("target", event.target);
+  console.log("currentTarget", event.currentTarget);
+
+  const button = event.target.closest("[data-action]");
+  if (!button) return;
+
+  const id = button.closest("li").dataset.id;
+
+  if (button.dataset.action === "toggle") {
+    const film = films.find((f) => f.id === id);
+    film.watched = !film.watched;
+  } else if (button.dataset.action === "delete") {
+    films.splice(
+      films.findIndex((f) => f.id === id),
+      1,
+    );
+  }
+  render();
+});
+
+document.querySelector("#hint-close").addEventListener(
+  "click",
+  () => {
+    document.querySelector("#hint").remove();
+  },
+  { once: true },
+);
+
+//forma za dodavanje --- početak
+
+const form = document.querySelector("#add-form");
+const titleInput = form.elements.title;
+const message = document.querySelector("#message");
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault(); //jako bitna metoda da se ne refresha sve
+
+  const formData = new FormData(form); //dohvaća podatke
+  const data = Object.fromEntries(formData); //čisti podatke i sprema kao jednostavan objekt
+
+  if (data.title.trim() === "") return;
+
+  films.push({
+    id: crypto.randomUUID(),
+    title: data.title,
+    genre: data.genre,
+    minutes: Number(data.minutes),
+    watched: form.elements.watched.checked,
+  });
+
+  render(); //refresh
+
+  message.textContent = `Dodano: ${data.title}`;
+  form.reset();
+  titleInput.focus();
+});
+
+//forma za dodavanje --- kraj
 
 render();

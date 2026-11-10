@@ -1,30 +1,91 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Filmoteka</title>
-    <link rel="stylesheet" href="dist/output.css">
+    <link rel="stylesheet" href="dist/output.css" />
     <script src="js/main.js" defer></script>
-</head>
-<body class="bg-slate-100 text-slate-800">
-    
+  </head>
+  <body class="bg-slate-100 text-slate-800">
     <main class="mx-auto max-w-2xl space-y-6 p-4">
-        <h1 class="text-3xl font-bold">Filmoteka</h1>
+      <h1 class="text-3xl font-bold">Filmoteka</h1>
 
-        <div id="hint" class="flex items-center gap-3 rounded bg-amber-100 p-3 text-sm">
-            <p class="flex-1">Savjet: tipka ESC u polju za pretragu briše upisani pojam.</p>
-            <button id="hint-close" type="button" class="rounded px-2 py-1 hover:bg-amber-200 ">Zatvori</button>
+      <div
+        id="hint"
+        class="flex items-center gap-3 rounded bg-amber-100 p-3 text-sm"
+      >
+        <p class="flex-1">
+          Savjet: tipka ESC u polju za pretragu briše upisani pojam.
+        </p>
+        <button
+          id="hint-close"
+          type="button"
+          class="rounded px-2 py-1 hover:bg-amber-200"
+        >
+          Zatvori
+        </button>
+      </div>
+
+      <form id="add-form" class="space-y-3 rounded bg-white p-4 shadow">
+        <h2 class="text-xl font-semibold">Novi film</h2>
+
+        <div>
+          <label for="title" class="block text-sm font-medium">Naziv</label>
+          <input
+            id="title"
+            name="title"
+            type="text"
+            class="w-full rounded border border-slate-300 px-2 py-1"
+          />
+          <p id="title-error" class="text-sm text-red-600"></p>
         </div>
 
-        <ul class="space-y-2" id="list">
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label for="genre" class="block text-sm font-medium">Žanr</label>
+            <select
+              id="genre"
+              name="genre"
+              class="w-full rounded border border-slate-300 px-2 py-1"
+            >
+              <option value="">Odaberi žanr</option>
+              <option value="animirani">animirani</option>
+              <option value="dokumentarni">dokumentarni</option>
+              <option value="drama">drama</option>
+              <option value="komedija">komedija</option>
+            </select>
+            <p id="genre-error" class="text-sm text-red-600"></p>
+          </div>
 
+          <div class="flex-1">
+            <label for="minutes" class="block text-sm font-medium"
+              >Trajanje (min)</label
+            >
+            <input
+              id="minutes"
+              name="minutes"
+              type="number"
+              class="w-full rounded border border-slate-300 px-2 py-1"
+            />
+            <p id="minutes-error" class="text-sm text-red-600"></p>
+          </div>
+        </div>
 
-        </ul>
+        <label class="flex items-center gap-2 text-sm">
+          <input name="watched" type="checkbox" />Već pogledano
+        </label>
 
+        <button
+          type="submit"
+          class="rounded bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700"
+        >
+          Dodaj
+        </button>
+        <p id="message" class="text-sm text-green-700" aria-live="polite"></p>
+      </form>
 
+      <ul class="space-y-2" id="list"></ul>
     </main>
-
-
-</body>
+  </body>
 </html>

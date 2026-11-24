@@ -44,6 +44,14 @@ const films = [
 ];
 
 const list = document.querySelector("#list");
+const counter = document.querySelector("#counter");
+const empty = document.querySelector("#empty");
+
+const state = {
+  query:"",
+  genre: "all",
+  sort: "title"
+};
 
 function createItem(film) {
   const li = document.createElement("li");
@@ -73,8 +81,32 @@ function createItem(film) {
   return li;
 }
 
+function visibleFilms(){
+  const query = state.query.trim().toLowerCase();
+
+  const filtered = films.filter((film) => {
+    const matchesQuery = film.title.toLowerCase().includes(query);
+    const matchesGenre = state.genre === "all" || film.genre === state.genre;
+    return matchesQuery && matchesGenre;
+  });
+
+
+const comparisons = {
+  "title": (a,b) => a.title.localeCompare(b.title, "hr"),
+  "minutes-asc": (a,b) => a.minutes - b.minutes,
+  "minutes-desc": (a,b) => b.minutes - a.minutes
+};
+
+return filtered.toSorted(comparisons[state.sort]);
+
+
+}
+
 function render() {
-  list.replaceChildren(...films.map(createItem));
+  const visible = visibleFilms();
+  list.replaceChildren(...visible.map(createItem));
+  counter.textContent = `Prikazano ${visible.length} od ${films.length}`;
+  empty.hidden = visible.length > 0;
 }
 
 list.addEventListener("click", (event) => {
@@ -106,19 +138,64 @@ document.querySelector("#hint-close").addEventListener(
   { once: true },
 );
 
-//forma za dodavanje --- početak
+//forma za dodavanje --- 
 
 const form = document.querySelector("#add-form");
 const titleInput = form.elements.title;
 const message = document.querySelector("#message");
 
+//
+function errorMessage(field) {
+const v = field.validity;
+
+if(v.valueMissing) return "Ovo polje je obavezno.";
+if(field.value.trim().length < field.minLength) return `Upiši barem ${field.minLength} znaka.`;
+if(v.badInput) return "Upiši broj.";
+if(v.rangeUnderflow) return `Najmanje ${field.min} min.`;
+if(v.rangeOverflow) return `Najviše ${field.max} min.`;
+if(v.stepMismatch) return "Upiši cijeli broj minuta.";
+if(v.customError) return field.validationMessage;
+
+return "";
+}
+
+function checkField(field){
+  const text = errorMessage(field);
+  document.querySelector(`#${field.id}-error`).textContent = text;
+  field.setAttribute("aria-invalid", text !== ""); //
+  return text === ""; //vraća true ako je polje ispravno, a false ako 
+}
+
+function checkUniqueTitle(){
+  const title = titleInput.value.trim().toLowerCase();
+  const exists = films.some((film) => film.title.toLowerCase() === title);
+  titleInput.setCustomValidity(exists ? "Film s tim nazivom već postoji." : "");
+}
+
+let submitAttempted = false;
+
+
 form.addEventListener("submit", (event) => {
-  event.preventDefault(); //jako bitna metoda da se ne refresha sve
+  event.preventDefault(); //jako bitna metoda da se ne refresha 
+  submitAttempted = true;
 
-  const formData = new FormData(form); //dohvaća podatke
-  const data = Object.fromEntries(formData); //čisti podatke i sprema kao jednostavan objekt
+  titleInput.value = titleInput.value.trim();
+  checkUniqueTitle();
+  //iz forme filtriramo sve elemente koji se mogu validirati i koji su 
+  const fields = [...form.elements].filter((el) => el.willValidate && el.required); // [title, genre, minutes] 
+  //nad svakim obveznim elementom pozivamo checkField funkciju i ovisno o rezultatu uključujemo je ili isključujemo iz 
+  const results = fields.map(checkField); //npr. [true, false, true]
+  //tražimo prvo polje koje nije ispravno
+  const firstInvalid = fields[results.indexOf(false)]; //npr. genre  
+  if(firstInvalid){
+    firstInvalid.focus();
+    return;
+  }
 
-  if (data.title.trim() === "") return;
+  const formData = new FormData(form); //dohvaća 
+  const data = Object.fromEntries(formData); //čisti podatke i sprema kao jednostavan 
+
+  //if (data.title.trim() === "") return;
 
   films.push({
     id: crypto.randomUUID(),
@@ -128,13 +205,50 @@ form.addEventListener("submit", (event) => {
     watched: form.elements.watched.checked,
   });
 
-  render(); //refresh
+  render(); //
 
   message.textContent = `Dodano: ${data.title}`;
   form.reset();
+  submitAttempted = false;
   titleInput.focus();
+});
+
+form.addEventListener("input", (event) => {
+if(event.target === titleInput) checkUniqueTitle();
+if (submitAttempted && event.target.required) checkField(event.target);
 });
 
 //forma za dodavanje --- kraj
 
+const search = document.querySelector("#search");
+
+search.addEventListener("input", (event) => {
+  state.query = event.target.value;
+  render();
+});
+
+//za browsere u kojima se ne brise s escape
+search.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    search.value = "";
+    state.query="";
+    render();
+  }
+});
+
+const genreFilter = document.querySelector("#genre-filter");
+const genres = [...new Set(films.map((film)=>film.genre))].sort((a,b) => a.localeCompare(b,"hr"));
+for (const genre of genres){
+  genreFilter.append(new Option(genre, genre));
+}
+
+genreFilter.addEventListener("change", (event) => {
+  state.genre = event.target.value;
+  render();
+});
+
+document.querySelector("#sort").addEventListener("change", (event) => {
+  state.sort = event.target.value;
+  render();
+});
 render();

@@ -27,7 +27,7 @@
         </button>
       </div>
 
-      <form id="add-form" class="space-y-3 rounded bg-white p-4 shadow">
+      <form id="add-form" class="space-y-3 rounded bg-white p-4 shadow" novalidate>
         <h2 class="text-xl font-semibold">Novi film</h2>
 
         <div>
@@ -37,6 +37,9 @@
             name="title"
             type="text"
             class="w-full rounded border border-slate-300 px-2 py-1"
+            required 
+            minlength="2"
+            aria-describedby="title-error"
           />
           <p id="title-error" class="text-sm text-red-600"></p>
         </div>
@@ -48,6 +51,8 @@
               id="genre"
               name="genre"
               class="w-full rounded border border-slate-300 px-2 py-1"
+              required
+              aria-describedby="genre-error"
             >
               <option value="">Odaberi žanr</option>
               <option value="animirani">animirani</option>
@@ -67,6 +72,11 @@
               name="minutes"
               type="number"
               class="w-full rounded border border-slate-300 px-2 py-1"
+              required
+              min="1"
+              max="300"
+              step="1" 
+              aria-describedby="minutes-error"
             />
             <p id="minutes-error" class="text-sm text-red-600"></p>
           </div>
@@ -85,7 +95,28 @@
         <p id="message" class="text-sm text-green-700" aria-live="polite"></p>
       </form>
 
-      <ul class="space-y-2" id="list"></ul>
+      <div>
+        <input id = "search" type="search" placeholder="Pretražiti po nazivu" aria-label="Pretraga"
+          class="flex-1 rounded border border-slate-300 bg-white px-2 py-1">
+
+          <select id="genre-filter" aria-label="Žanr" class="rounded border border-slate-300 bg-white px-2 py-1">
+            <option value="all">Svi žanrovi</option>
+          </select>
+
+          <select id="sort" aria-label="Sortiranje" class="rounded border border-slate-300 bg-white px-2 py-1">
+            <option value="all">Naziv</option>
+            <option value="minutes-asc">Trajanje: od kraćeg</option>
+            <option value="minutes-desc">Trajanje: od dužeg</option>
+
+          </select>
+
+      </div>
+        <p id ="counter" class="text-sm text-slate-600"></p>
+      <ul class="space-y-2" id = "list">
+
+      </ul>
+
+      <p id="empty" hidden class="text-slate-500">Nema filmova koji odgovaraju odabiru</p>
     </main>
   </body>
 </html>
